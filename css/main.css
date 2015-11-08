@@ -111,7 +111,7 @@ textarea {
 }
 
 #rightmenu {
-    width: 300px;
+    width: 320px;
     float: right;
     margin-right: 10px;
     border: 1px solid lightgray;    
@@ -122,7 +122,7 @@ textarea {
 }
 
 #maincontent {
-    width: 870px;
+    width: 850px;
     float: left;
     margin-left: 10px;
     border: 1px solid lightgray;   
@@ -137,6 +137,7 @@ textarea {
 }
 
 #headersection {
+    height: 30px;
     background-color: lightgray;
     padding: 10px 10px 10px 10px;   
     font-weight: bold;
@@ -151,7 +152,12 @@ textarea {
     border-radius: 0px 0px 10px 10px;
     -moz-border-radius: 0px 0px 10px 10px;
     -webkit-border-radius: 0px 0px 10px 10px;         
-    }
+}
+
+#editbutton {
+    float: right;
+    font-weight: normal;
+}
 
 .settingsinput {
     width: 98%;     
@@ -160,6 +166,7 @@ textarea {
 .settingslabel {
     
 }
+
 
 
 
