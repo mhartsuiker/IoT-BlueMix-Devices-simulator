@@ -1,0 +1,98 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Iot Device simulator for cloud services</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div id="container">
+            <!-- Add your site or application content here -->
+            <div id="header">
+                <p>
+                    <h2>Internet of Things device simulator for cloud services</h2>
+                </p>                   
+            </div>            
+            <div id="rightmenu">
+                <div id="headersection">
+                    Settings
+                </div>  
+                <div id="bodysection">
+                    <form id="settingsform">
+                        <fieldset>
+                            <label class="settingslabel" for="numberOfIotDevices">Number of IoT devices</label>
+                            <input class="settingsinput" type="number" pattern="[0-9]*" name="numberOfDevices" value="2"><br />
+                            <label class="settingslabel" for="broker">Broker</label><br />
+                            <input class="settingsinput" type="text" name="broker" value="messaging.internetofthings.ibmcloud.com" disabled> 
+                            <label class="settingslabel" for="port">Port</label><br />
+                            <input class="settingsinput" type="number" name="port" value="1883" disabled>    
+                            
+                            <label class="settingslabel" for="protocol">Protocol</label><br />
+                            <input class="settingsinput" type="text" name="protocol" value="mqtt" disabled>    
+                            
+                            <label class="settingslabel" for="organisation">Organisation</label><br />
+                            <input class="settingsinput" type="text" name="organisation">                            
+                                                    
+                            <label class="settingslabel" for="sensortype">Sensor type</label><br />
+                            <input class="settingsinput" type="text" name="sensortype" value="tempsensor" disabled>  
+                            <label class="settingslabel" for="deviceid">Device ID</label><br />
+                            <input class="settingsinput" type="text" name="devideid" value="tempsensor_*" disabled>  
+                                                                                                 
+                            
+                            <label class="settingslabel" for="authmethod">Authentication method</label><br />
+                            <input class="settingsinput" type="text" name="authmethod" value="use-token-auth" disabled>          
+                            
+                            <label class="settingslabel" for="authtoken">Authentication token</label><br />
+                            <input class="settingsinput" type="text" name="authtoken">                                            
+                            
+                            <label class="settingslabel" for="jsonformat">JSON format</label><br />
+                            <input class="settingsinput" type="text" name="jsonformat">                                                 
+                            <input id="startbutton" type="submit" name="submit" value="Start IoT clients">
+                        </fieldset>
+                    </form>
+                </div>                              
+            </div>
+            <div id="maincontent">
+                 <div id="headersection">
+                    <label for="settings">Devices</label>                 
+                </div>      
+                <div id="bodysection">
+                    
+                </div>          
+            </div>
+        </div>
+
+
+
+
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.3.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+<!--
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
+        </script>
+-->
+    </body>
+</html>
