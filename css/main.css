@@ -98,38 +98,43 @@ textarea {
 #container {    
     width: 1200px;
     margin: auto;
-    
 }
 
 #header {
-    margin: 5px 10px 5px 10px;
-    padding: 10px 10px 10px 10px;
-    border: 1px solid lightgray;     
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;    
+    margin-bottom: 10px;
+    padding: 10px 10px 10px 10px;  
+    background-color: #d00e0e; 
+}
+
+#headercontent {
+    width: 1200px;
+    margin: auto;
+    color: #ffffff;
 }
 
 #rightmenu {
     width: 320px;
     float: right;
     margin-right: 10px;
-    border: 1px solid lightgray;    
+    border: 1px solid #e6e6e6;    
+/*
     background-color: lightgray;    
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;    
+*/
 }
 
 #maincontent {
-    width: 850px;
+    width: 860px;
     float: left;
-    margin-left: 10px;
-    border: 1px solid lightgray;   
-    background-color: lightgray;
+    border: 1px solid #e6e6e6;   
+    background-color: #ffffff;
+/*
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;        
+*/
 }
 
 #startbutton {
@@ -138,20 +143,39 @@ textarea {
 
 #headersection {
     height: 30px;
-    background-color: lightgray;
+    background-color: #e6e6e6;
     padding: 10px 10px 10px 10px;   
     font-weight: bold;
+/*
     border-radius: 10px 10px 0px 0px;
     -moz-border-radius: 10px 10px 0px 0px;
     -webkit-border-radius: 10px 10px 0px 0px;   
+*/
 }
 
-#bodysection {
+.devicesection {
     background-color: white;
     padding: 10px 10px 10px 10px;  
+    margin: auto;
+/*
     border-radius: 0px 0px 10px 10px;
     -moz-border-radius: 0px 0px 10px 10px;
     -webkit-border-radius: 0px 0px 10px 10px;         
+*/
+}
+
+.device {
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    width: 268px;
+    height: 200px;
+    background-color: #ffffff;
+    border: 1px solid #e6e6e6;   
+}
+
+.devicecontent {
+    padding: 10px 10px 10px 10px;
 }
 
 #editbutton {
@@ -167,9 +191,20 @@ textarea {
     
 }
 
+#storesettings {
+    float: right;
+}
 
-
-
+#errormessages {
+    border: 1px solid #eed3d7;
+    background-color: #f2dede;
+    padding: 10px 10px 10px 10px;      
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: none;
+    color: #b94a48;
+}
 
 /* ==========================================================================
    Helper classes
