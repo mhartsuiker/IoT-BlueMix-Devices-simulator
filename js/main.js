@@ -20,19 +20,35 @@ var deviceModule = (function() {
     };
     
     deviceService.prototype.createDevice = function(id) {
-        console.log('createdevice called');
         var identifier = id + 1
         $('.devicesection').append("<div class='device'>" +
                                         "<div id='headersection'>" + 
                                             "Device " + identifier +
                                         "</div>" +
                                         "<div class='devicecontent' data-id="+ id +">" +
-                                            "test<br />" +
-                                            "<label class='settingslabel' for='transmitinterval'>Transmit interval in seconds</label>" +
-                                            "<input class='settingsinput' type='number' pattern='[0-9]*' name='transmitinterval' value='10'><br /><br />" +
+                                            "<span class='devicestatus'>" +
+                                                "<div class='statusbuttonon' title='click to change the status of the device'></div>" +                                            
+                                                "<label class='devicelabel' for='status'>device status</label>" + 
+                                            "</span>" +
+                                            "<span class='devicebutton'>" + 
+                                                "<label class='devicelabel' for='temperature'>temperature</label>" +
+                                                "<input class='deviceinput' id='temperature' type='number' pattern='[0-9]*' name='temperature' value='25'>" +
+                                                "<input class='settemperature' type='button' name='settemperature' value='Set temperature'>" +
+                                            "</span>" +
                                         "</div>" +
-                                    "</div>");        
+                                    "</div>");    
+                                    
+                                    
+                                                        
     }    
+    
+    deviceService.prototype.startDevice = function(id) {
+        console.log('device started with id: ' + id);
+    }
+    
+    deviceService.prototype.updateDevice = function(id, temperature, state) {
+        
+    }
     
     // Create a new controller, the controller will create a new service 
     // for the total number of devices requested
@@ -96,9 +112,12 @@ var deviceModule = (function() {
         
         deviceController.prototype.start = function() {
             for(var i = 0; i < services.length; i++) {
-                console.log('inside start function');
                 services[i].createDevice(i);
-            }
+            }         
+        }
+        
+        deviceController.prototype.updateDevice = function(id, temperature, state) {
+            
         }
     };
            
@@ -116,6 +135,7 @@ var deviceModule = (function() {
 
 
 $(document).ready(function() {
+    "use strict"
     
     var deviceController = null;
        
@@ -148,6 +168,29 @@ $(document).ready(function() {
         deviceController.start();
         
     });
+    
+    $('.devicesection').on('click', '.settemperature', function(e) {
+        var that = this;
+        var id = that.parentElement.parentNode.getAttribute('data-id');      
+        var temperature = that.parentElement.children[1].value;
+        deviceController.updateDevice(id, temperature, 'on');
+    });
+    
+    $('.devicesection').on('click', '.statusbuttonon', function(e) {
+        var that = this;
+        var id = that.parentElement.parentNode.getAttribute('data-id');      
+        var currentChild = that.parentElement.children[0];
+        currentChild.className = 'statusbuttonoff';
+
+    });    
+    
+    $('.devicesection').on('click', '.statusbuttonoff', function(e) {
+        var that = this;
+        var id = that.parentElement.parentNode.getAttribute('data-id');      
+        var currentChild = that.parentElement.children[0];
+        currentChild.className = 'statusbuttonon';
+
+    });  
     
     // If form data is stored in LocalStorage retrieve it and fill the form with the data    
     if (typeof(Storage) !== "undefined") {

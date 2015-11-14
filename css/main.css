@@ -96,7 +96,9 @@ textarea {
    ========================================================================== */
 
 #container {    
+/*
     width: 1200px;
+*/
     margin: auto;
 }
 
@@ -104,10 +106,14 @@ textarea {
     margin-bottom: 10px;
     padding: 10px 10px 10px 10px;  
     background-color: #d00e0e; 
+    margin-right: 10px;
+    margin-left: 10px;    
 }
 
 #headercontent {
+/*
     width: 1200px;
+*/
     margin: auto;
     color: #ffffff;
 }
@@ -126,8 +132,9 @@ textarea {
 }
 
 #maincontent {
-    width: 860px;
+    width: 75%;
     float: left;
+    margin-left: 10px;
     border: 1px solid #e6e6e6;   
     background-color: #ffffff;
 /*
@@ -168,27 +175,62 @@ textarea {
     float: left;
     margin-right: 10px;
     margin-bottom: 10px;
-    width: 268px;
-    height: 200px;
+    width: 290px;
+    height: 150px;
     background-color: #ffffff;
     border: 1px solid #e6e6e6;   
+}
+.devicestatus {
+    margin-bottom: 10px;
+}
+
+.statusbuttonon {
+    width: 20px;
+    height: 20px;
+    float: right;
+    background-color: green;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;;      
+}
+
+.statusbuttonon:hover {
+    background-color: darkgreen;
+}
+
+.statusbuttonoff {
+    width: 20px;
+    height: 20px;
+    float: right;
+    background-color: red;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;;      
+}
+
+.devicebutton {
+    margin-top: 20px;
+    float: right;
+}
+
+.devicelabel {
+    margin-right: 10px;
+}
+
+.deviceinput {
+    width: 12%;
+    margin-right: 10px;
 }
 
 .devicecontent {
     padding: 10px 10px 10px 10px;
 }
 
-#editbutton {
-    float: right;
-    font-weight: normal;
+.settemperature {
 }
 
 .settingsinput {
     width: 98%;     
-}
-
-.settingslabel {
-    
 }
 
 #storesettings {
