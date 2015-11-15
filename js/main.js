@@ -1,70 +1,138 @@
-
-
-var deviceModule = (function() {
+// Represents one individual IoT device
+var Device = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat, transmitInterval, temperature, state) {
+    'use strict';
     
-    var settings = {};
-    var services = [];
+    var device = {};
+       
+    // Device parameters
+    device.id = id,
+    device.broker = broker,
+    device.port = port,
+    device.protocol = protocol,
+    device.organisation = organisation,
+    device.sensortype = sensortype;
+    device.deviceid = deviceid,
+    device.authmethod = authmethod,
+    device.authtoken = authtoken,
+    device.jsonformat = jsonformat,
+    device.state = state,
+    device.temperature = temperature,
+    device.interval = transmitInterval,
+    device.transmitting = null;
     
-    // Each device has it's own service that controls everythign the device can do
-    var deviceService = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat) {
-        var id = id,
-            broker = broker,
-            port = port,
-            protocol = protocol,
-            organisation = organisation,
-            sensortype = sensortype;
-            deviceid = deviceid,
-            authmethod = authmethod,
-            authtoken = authtoken,
-            jsonformat = jsonformat;     
-    };
-    
-    deviceService.prototype.createDevice = function(id) {
+    device.createDevice = function(id) {
         var identifier = id + 1
         $('.devicesection').append("<div class='device'>" +
                                         "<div id='headersection'>" + 
-                                            "Device " + identifier +
+                                            "IoT-device " + identifier +
                                         "</div>" +
-                                        "<div class='devicecontent' data-id="+ id +">" +
+                                        "<div class='devicecontent' data-id="+ device.id +">" +
                                             "<span class='devicestatus'>" +
                                                 "<div class='statusbuttonon' title='click to change the status of the device'></div>" +                                            
                                                 "<label class='devicelabel' for='status'>device status</label>" + 
                                             "</span>" +
                                             "<span class='devicebutton'>" + 
                                                 "<label class='devicelabel' for='temperature'>temperature</label>" +
-                                                "<input class='deviceinput' id='temperature' type='number' pattern='[0-9]*' name='temperature' value='25'>" +
+                                                "<input class='deviceinput' id='temperature' type='number' pattern='[0-9]*' name='temperature' value=" + device.temperature + ">" +
                                                 "<input class='settemperature' type='button' name='settemperature' value='Set temperature'>" +
                                             "</span>" +
                                         "</div>" +
-                                    "</div>");    
-                                    
-                                    
-                                                        
+                                    "</div>");   
+        device.startDevice();
     }    
     
-    deviceService.prototype.startDevice = function(id) {
-        console.log('device started with id: ' + id);
+    var startTransmit = function() {
+        if (device.state == 'ON') {
+            console.log('transmitting id = ' + device.id + ' temperature = ' + device.temperature);                
+        }
+        else {
+           console.log('device turned off,  id = ' + device.id);              
+        }  
     }
     
-    deviceService.prototype.updateDevice = function(id, temperature, state) {
-        
+    var cancelTransmit = function() {
+        clearInterval(device.transmitting);
+    }
+
+    device.updateDevice = function(id, temperature) {
+        device.temperature = temperature;
+        cancelTransmit();
+        device.transmitting = setInterval(startTransmit, device.interval * 1000)        
+    }
+    
+    device.startDevice = function() {
+        device.transmitting = setInterval(startTransmit, device.interval * 1000)
+    }
+    
+    device.changeDeviceState = function(state) {
+        if (state == 'OFF') {
+            device.state = 'OFF';
+            cancelTransmit();    
+        }
+        else {   
+            device.state = 'ON';              
+        }   
+    }
+    
+    device.getDetails = function() {
+        console.log(device);
+    }
+    
+    return device;
+}
+
+// Module to keep all the functionality in one location
+var deviceModule = (function() {
+    'use strict';
+    
+    var settings = {};
+    var services = [];
+    
+    var deviceState = {
+        'ON': 'ON',
+        'OFF': 'OFF'
+    };
+     
+    // Each device has it's own service that controls everything the device can do
+    var deviceService = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat, 
+            transmitInterval, temperature, state) {
+        var device = Device(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat, transmitInterval,
+            temperature, state);
+        return device;
+    };
+    
+    deviceService.prototype.startDevice = function(id) {
+        services[id].startDevice();
+    }
+    
+    deviceService.prototype.updateDevice = function(id, state) {
+        services[id].updateDevice(id, state);
+    }
+    
+    deviceService.prototype.changeDeviceState = function(id, state) {
+        services[id].changeDeviceState(state);
     }
     
     // Create a new controller, the controller will create a new service 
     // for the total number of devices requested
+    // The controller talks to the front-end
     var deviceController = function(data) {
+        
+        // Only internally visible
         this.settings = JSON.parse(data);
                
         var broker = null,
             port = null,
             protocol = null,
             organisation = null,
-            sensortype = null;
+            sensortype = null,
             deviceid = null,
             authmethod = null,
             authtoken = null,
             jsonformat = null,
-            numberOfDevices = null;
+            numberOfDevices = null,
+            temperature = null,
+            transmitInterval = null;
         
         for(var i = 0; i < this.settings.length; i++) {
             var d = this.settings[i];            
@@ -95,10 +163,16 @@ var deviceModule = (function() {
             }                                    
             if (this.settings[i].name == 'jsonformat') {
                 this.jsonformat = this.settings[i].value;          
-            }                 
+            }       
+            if (this.settings[i].name == 'temperature') {
+                this.temperature = this.settings[i].value;         
+            }                        
             if (this.settings[i].name == 'numberOfDevices') {
                 this.numberOfDevices = this.settings[i].value;         
-            }           
+            }     
+            if (this.settings[i].name == 'transmitinterval') {
+                this.transmitInterval = this.settings[i].value;         
+            }                    
         }
         
         services = [];
@@ -106,19 +180,24 @@ var deviceModule = (function() {
         // Create a new service for the requested number of devices. 'i' will serve as the service id. 
         // Push the new servivce into the services array
         for(var i = 0; i < this.numberOfDevices; i++) {
-          services.push(new deviceService(i + 1, this.broker, this.port, this.protocol, this.organisation, this.sensortype, this.deviceid,
-                                 this.authmethod, this.authtoken, this.jsonformat));          
+          services.push(new deviceService(i, this.broker, this.port, this.protocol, this.organisation, this.sensortype, this.deviceid,
+            this.authmethod, this.authtoken, this.jsonformat, this.transmitInterval, this.temperature, 'ON'));          
         }
         
+        // Externally visible
         deviceController.prototype.start = function() {
             for(var i = 0; i < services.length; i++) {
                 services[i].createDevice(i);
             }         
         }
         
-        deviceController.prototype.updateDevice = function(id, temperature, state) {
-            
-        }
+        deviceController.prototype.updateDevice = function(id, temperature) {
+            services[id].updateDevice(id, temperature);  
+        }     
+        
+        deviceController.prototype.changeDeviceState = function(id, state) {           
+            services[id].changeDeviceState(state);  
+        }  
     };
            
     return {
@@ -135,7 +214,7 @@ var deviceModule = (function() {
 
 
 $(document).ready(function() {
-    "use strict"
+    'use strict';
     
     var deviceController = null;
        
@@ -173,15 +252,15 @@ $(document).ready(function() {
         var that = this;
         var id = that.parentElement.parentNode.getAttribute('data-id');      
         var temperature = that.parentElement.children[1].value;
-        deviceController.updateDevice(id, temperature, 'on');
+        deviceController.updateDevice(id, temperature);
     });
     
     $('.devicesection').on('click', '.statusbuttonon', function(e) {
         var that = this;
         var id = that.parentElement.parentNode.getAttribute('data-id');      
-        var currentChild = that.parentElement.children[0];
+        var currentChild = that.parentElement.children[0];    
         currentChild.className = 'statusbuttonoff';
-
+        deviceController.changeDeviceState(id, 'OFF');
     });    
     
     $('.devicesection').on('click', '.statusbuttonoff', function(e) {
@@ -189,7 +268,7 @@ $(document).ready(function() {
         var id = that.parentElement.parentNode.getAttribute('data-id');      
         var currentChild = that.parentElement.children[0];
         currentChild.className = 'statusbuttonon';
-
+        deviceController.changeDeviceState(id, 'ON');
     });  
     
     // If form data is stored in LocalStorage retrieve it and fill the form with the data    

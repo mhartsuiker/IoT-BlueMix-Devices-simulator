@@ -160,6 +160,10 @@ textarea {
 */
 }
 
+#bodysection {
+    padding: 10px 10px 10px 10px;  
+}
+
 .devicesection {
     background-color: white;
     padding: 10px 10px 10px 10px;  
