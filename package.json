@@ -1,0 +1,25 @@
+{
+  "name": "IoT-BlueMix-Devices-simulator",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "^4.13.3"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "description": "Simulate IoT devices sending data to IBM BlueMix",
+  "main": "server.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhartsuiker/IoT-BlueMix-Devices-simulator.git"
+  },
+  "author": "Marc Hartsuiker",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mhartsuiker/IoT-BlueMix-Devices-simulator/issues"
+  },
+  "homepage": "https://github.com/mhartsuiker/IoT-BlueMix-Devices-simulator#readme"
+}
