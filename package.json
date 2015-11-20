@@ -10,7 +10,8 @@
   "description": "Simulate IoT devices sending data to IBM BlueMix",
   "main": "server.js",
   "directories": {
-    "doc": "doc"
+    "doc": "doc",
+    "public": "public"
   },
   "repository": {
     "type": "git",

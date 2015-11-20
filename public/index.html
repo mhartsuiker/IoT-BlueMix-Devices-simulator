@@ -6,14 +6,14 @@
         <title>IBM BlueMix/IoT device simulator</title>
         <meta name="description" content="Iot device simulator for IBM BlueMix">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noindex">        
+        <meta name="robots" content="noindex, nofollow">        
 
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
         <!-- Place favicon.ico in the root directory -->
 
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
-        <script src="Scripts/vendor/modernizr-2.8.3.min.js"></script>
+        <script src="scripts/vendor/modernizr-2.8.3.min.js"></script>
     </head>
     <body>
         <!--[if lt IE 8]>
@@ -37,29 +37,27 @@
                     <form id="settingsform">
                         <fieldset>
                             <label class="settingslabel" for="broker">Broker</label><br />
-                            <input class="settingsinput" type="text" name="broker" value="messaging.internetofthings.ibmcloud.com"> 
+                            <input class="settingsinput" id="broker" type="text" name="broker" value="messaging.internetofthings.ibmcloud.com"> 
                             <label class="settingslabel" for="port">Port</label><br />
-                            <input class="settingsinput" type="number" name="port" value="1883">    
+                            <input class="settingsinput" id="portnumber" type="number" name="port" value="1883">    
                             <label class="settingslabel" for="protocol">Protocol</label><br />
-                            <input class="settingsinput" type="text" name="protocol" value="mqtt">    
+                            <input class="settingsinput" id="protocol" type="text" name="protocol" value="mqtt">    
                             <label class="settingslabel" for="organisation">Organisation</label><br />
-                            <input class="settingsinput" type="text" name="organisation">                            
+                            <input class="settingsinput" id="organisation" type="text" name="organisation">                            
                             <label class="settingslabel" for="sensortype">Sensor type</label><br />
-                            <input class="settingsinput" type="text" name="sensortype" value="tempsensor">  
+                            <input class="settingsinput" id="sensortype" type="text" name="sensortype" value="tempsensor">  
                             <label class="settingslabel" for="deviceid">Device ID mask</label><br />
-                            <input class="settingsinput" type="text" name="deviceid" value="tempsensor_*">  
+                            <input class="settingsinput" id="deviceid" type="text" name="deviceid" value="tempsensor_*">  
                             <label class="settingslabel" for="authmethod">Authentication method</label><br />
-                            <input class="settingsinput" type="text" name="authmethod" value="use-token-auth">          
+                            <input class="settingsinput" id="authmethod" type="text" name="authmethod" value="use-token-auth">          
                             <label class="settingslabel" for="authtoken">Authentication token</label><br />
-                            <input class="settingsinput" type="text" name="authtoken">                                            
-                            <label class="settingslabel" for="jsonformat">JSON format</label><br />
-                            <input class="settingsinput" type="text" name="jsonformat">
+                            <input class="settingsinput" id="authtoken" type="text" name="authtoken">                                            
                             <label class="settingslabel" for="startTemperature">Start temperature</label>
-                            <input class="settingsinput" type="number" pattern="[0-9]*" name="temperature" value="25">                            
+                            <input class="settingsinput" id="temperature" type="number" pattern="[0-9]*" name="temperature" value="25">                            
                             <label class="settingslabel" for="numberOfIotDevices">Number of IoT devices</label>
-                            <input class="settingsinput" type="number" pattern="[0-9]*" name="numberOfDevices" value="2">
+                            <input class="settingsinput" id="numberOfDevices" type="number" pattern="[0-9]*" name="numberOfDevices" value="2">
                             <label class="settingslabel" for="transmitinterval">Transmit interval in seconds</label>
-                            <input class="settingsinput" type="number" pattern="[0-9]*" name="transmitinterval" value="10"><br /><br />                        
+                            <input class="settingsinput" id="transmitinterval" type="number" pattern="[0-9]*" name="transmitinterval" value="10"><br /><br />                        
                         </fieldset>
                     </form>
                     <input id="startbutton" type="submit" name="submitclientsettings" value="Start IoT clients">
@@ -80,7 +78,8 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="Scripts/vendor/jquery-1.11.3.min.js"><\/script>')</script>
-        <script src="Scripts/plugins.js"></script>
-        <script src="Scripts/main.js"></script>
+        <script src="scripts/plugins.js"></script>
+        <script src="scripts/mqttws31.js"></script>
+        <script src="scripts/main.js"></script>
     </body>
 </html>

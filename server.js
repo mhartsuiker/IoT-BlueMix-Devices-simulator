@@ -1,11 +1,8 @@
 var express = require("express");
 var app     = express();
-var path    = require("path");
 
-app.use(express.static(__dirname + '/View');
-//Store all HTML files in view folder.
-app.use(express.static(__dirname + '/Script'));
-//Store all JS and CSS in Scripts folder.
+app.use(express.static('public'));
+app.use(express.static('script'));
 
 app.get('/',function(req,res){
   res.sendFile('index.html');

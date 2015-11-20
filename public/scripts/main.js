@@ -1,5 +1,5 @@
 // Represents one individual IoT device
-var Device = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat, transmitInterval, temperature, state) {
+var Device = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state) {
     'use strict';
     
     var device = {};
@@ -10,21 +10,28 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     device.port = port,
     device.protocol = protocol,
     device.organisation = organisation,
-    device.sensortype = sensortype;
+    device.sensortype = sensortype,
     device.deviceid = deviceid,
     device.authmethod = authmethod,
     device.authtoken = authtoken,
-    device.jsonformat = jsonformat,
     device.state = state,
     device.temperature = temperature,
     device.interval = transmitInterval,
-    device.transmitting = null;
+    device.transmitting = null; 
+    var client = null;
+    
+    var constants = {
+        'MQTT': {
+            'AUTHMETHOD': 'use-token-auth',
+            'AUTHTOKEN' : 'ye6QXPs)F)FIIvYcz!',
+            'TOPIC': 'iot-2/evt/status/fmt/json'
+        }
+    }
     
     device.createDevice = function(id) {
-        var identifier = id + 1
         $('.devicesection').append("<div class='device'>" +
                                         "<div id='headersection'>" + 
-                                            "IoT-device " + identifier +
+                                            "IoT-device " + id +
                                         "</div>" +
                                         "<div class='devicecontent' data-id="+ device.id +">" +
                                             "<span class='devicestatus'>" +
@@ -40,8 +47,8 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
                                     "</div>");   
         device.startDevice();
     }    
-    
-    var startTransmit = function() {
+       
+    var startTransmit = function() {        
         if (device.state == 'ON') {
             console.log('transmitting id = ' + device.id + ' temperature = ' + device.temperature);                
         }
@@ -61,7 +68,46 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     }
     
     device.startDevice = function() {
-        device.transmitting = setInterval(startTransmit, device.interval * 1000)
+        var deviceIdentifier = device.deviceid + device.id;
+        var clientid = 'd:' + organisation + ':' + sensortype + ':' + deviceIdentifier;
+        var msg = '{"d": {"id": "' + deviceIdentifier + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}';        
+        var brokerurl = organisation + '.' + broker;
+        var portNumber = parseInt(port);
+        var connected = false;
+        if (!isNaN(portNumber)) {
+            console.log('SetupMQTTCllient, broker = ' + brokerurl + ' port = ' + port + ' clientid = ' + clientid);      
+            console.log('Clientid = ' + clientid);     
+            console.log('Message = ' + msg);
+             
+            client = new Paho.MQTT.Client(brokerurl, portNumber, clientid);     
+            
+            var options = {
+                timeout: 30, // Connection attempt timeout in seconds
+                userName: 'use-token-auth',
+                password: device.authmethod,
+                useSSL: false,
+                keepAliveInterval: 120,
+                onSuccess: function () {
+                    client.subscribe(constants.MQTT.TOPIC);
+                    device.transmitting = setInterval(function() {                          
+                        var message = new Paho.MQTT.Message(msg);
+                        client.send(message);
+                    }, device.interval * 1000)   
+                     
+                    console.log('Subscribed to topic: ' + constants.MQTT.TOPIC);                               
+                    console.log('Successfully connected to the IoT broker');
+                    connected = true;
+                },
+                 onFailure: function(message) {
+                    console.log('Error connecting to IBM IoT: ' + JSON.stringify(message));
+                    connected = false;
+                }  
+            };
+            client.connect(options);
+        }
+        else {
+            console.log('Error parsing port number');
+        }
     }
     
     device.changeDeviceState = function(state) {
@@ -94,10 +140,8 @@ var deviceModule = (function() {
     };
      
     // Each device has it's own service that controls everything the device can do
-    var deviceService = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat, 
-            transmitInterval, temperature, state) {
-        var device = Device(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, jsonformat, transmitInterval,
-            temperature, state);
+    var deviceService = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state) {
+        var device = Device(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state);
         return device;
     };
     
@@ -129,7 +173,6 @@ var deviceModule = (function() {
             deviceid = null,
             authmethod = null,
             authtoken = null,
-            jsonformat = null,
             numberOfDevices = null,
             temperature = null,
             transmitInterval = null;
@@ -153,7 +196,8 @@ var deviceModule = (function() {
                 this.sensortype = this.settings[i].value;
             }
             if (this.settings[i].name == 'deviceid') {
-                this.deviceid = this.settings[i].value;              
+                var tempid = this.settings[i].value.substring(0, this.settings[i].value.length - 1);
+                this.deviceid = tempid;              
             }
             if (this.settings[i].name == 'authmethod') {
                 this.authmethod = this.settings[i].value;         
@@ -161,9 +205,6 @@ var deviceModule = (function() {
             if (this.settings[i].name == 'authtoken') {
                 this.authtoken = this.settings[i].value;       
             }                                    
-            if (this.settings[i].name == 'jsonformat') {
-                this.jsonformat = this.settings[i].value;          
-            }       
             if (this.settings[i].name == 'temperature') {
                 this.temperature = this.settings[i].value;         
             }                        
@@ -179,9 +220,9 @@ var deviceModule = (function() {
         
         // Create a new service for the requested number of devices. 'i' will serve as the service id. 
         // Push the new servivce into the services array
-        for(var i = 0; i < this.numberOfDevices; i++) {
+        for(var i = 1; i <= this.numberOfDevices; i++) {
           services.push(new deviceService(i, this.broker, this.port, this.protocol, this.organisation, this.sensortype, this.deviceid,
-            this.authmethod, this.authtoken, this.jsonformat, this.transmitInterval, this.temperature, 'ON'));          
+            this.authmethod, this.authtoken, this.transmitInterval, this.temperature, 'ON'));          
         }
         
         // Externally visible
@@ -212,10 +253,9 @@ var deviceModule = (function() {
     
 })();
 
-
-$(document).ready(function() {
+$(function() {
     'use strict';
-    
+          
     var deviceController = null;
        
     $('#startbutton').on('click', function() {
@@ -273,9 +313,45 @@ $(document).ready(function() {
     
     // If form data is stored in LocalStorage retrieve it and fill the form with the data    
     if (typeof(Storage) !== "undefined") {
-        var data = JSON.parse(JSON.stringify(localStorage.getItem('iotdevicesimulation')));
+        var data = JSON.parse(localStorage.getItem('iotdevicesimulation'));
         if (data !== null || data !== 'undefined') {
             $('#settingscheckbox').prop('checked', true);
+                   
+            for(var i = 0; i < data.length; i++) {          
+                if (data[i].name == 'broker') {
+                    $('#broker').val(data[i].value);                
+                }
+                if (data[i].name == 'port') {
+                    $('#portnumber').val(data[i].value);          
+                }
+                if (data[i].name == 'protocol') {
+                    $('#protocol').val(data[i].value);
+                }
+                if (data[i].name == 'organisation') {
+                    $('#organisation').val(data[i].value);
+                }
+                if (data[i].name == 'sensortype') {
+                    $('#sensortype').val(data[i].value);
+                }
+                if (data[i].name == 'deviceid') {
+                    $('#deviceid').val(data[i].value);          
+                }
+                if (data[i].name == 'authmethod') {
+                    $('#authmethod').val(data[i].value);         
+                }
+                if (data[i].name == 'authtoken') {
+                    $('#authtoken').val(data[i].value);       
+                }                                     
+                if (data[i].name == 'temperature') {
+                    $('#temperature').val(data[i].value);         
+                }                        
+                if (data[i].name == 'numberOfDevices') {
+                    $('#numberOfDevices').val(data[i].value);         
+                }     
+                if (data[i].name == 'transmitinterval') {
+                    $('#transmitinterval').val(data[i].value);         
+                }  
+            }           
         }
     }
 }); 
