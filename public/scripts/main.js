@@ -96,11 +96,9 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
                      
                     console.log('Subscribed to topic: ' + constants.MQTT.TOPIC);                               
                     console.log('Successfully connected to the IoT broker');
-                    connected = true;
                 },
                  onFailure: function(message) {
                     console.log('Error connecting to IBM IoT: ' + JSON.stringify(message));
-                    connected = false;
                 }  
             };
             client.connect(options);

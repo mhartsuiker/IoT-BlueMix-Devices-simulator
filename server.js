@@ -5,7 +5,7 @@ app.use(express.static('public'));
 app.use(express.static('script'));
 
 app.get('/',function(req,res){
-  res.sendFile('index.html');
+  res.sendFile('./index.html');
   //It will find and locate index.html from View or Scripts
 });
 
