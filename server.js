@@ -11,7 +11,7 @@ app.use(express.static(__dirname + '/public/scripts'));
 //It will find and locate index.html from View or Scripts
 app.get("/", function(req, res) {
     res.sendfile("index.html", { root: __dirname });
-
+});
 app.listen(app.get('port'), function () {
     console.log('Express server listening on port ' + process.env.PORT);
 })
