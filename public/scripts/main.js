@@ -312,7 +312,7 @@ $(function() {
     // If form data is stored in LocalStorage retrieve it and fill the form with the data    
     if (typeof(Storage) !== "undefined") {
         var data = JSON.parse(localStorage.getItem('iotdevicesimulation'));
-        if (data !== null || data !== 'undefined') {
+        if (data !== null && data !== 'undefined') {
             $('#settingscheckbox').prop('checked', true);
                    
             for(var i = 0; i < data.length; i++) {          
