@@ -52,7 +52,8 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
         if (device.state == 'ON') {   
             var msg = '{"d": {"id": "' + deviceIdentifier + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}'; 
             var message = new Paho.MQTT.Message(msg);
-            client.send(message);      
+            client.send(message);    
+            console.log('Message = ' + msg);
             console.log('transmitting id = ' + device.id + ' temperature = ' + device.temperature);                
         }
         else {
@@ -79,7 +80,6 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
         if (!isNaN(portNumber)) {
             console.log('SetupMQTTCllient, broker = ' + brokerurl + ' port = ' + port + ' clientid = ' + clientid);      
             console.log('Clientid = ' + clientid);     
-            console.log('Message = ' + msg);
              
             client = new Paho.MQTT.Client(brokerurl, portNumber, clientid);     
             
