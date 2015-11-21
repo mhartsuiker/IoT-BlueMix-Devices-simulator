@@ -28,10 +28,10 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
         }
     }
     
-    device.createDevice = function(id) {
+    device.createDevice = function() {
         $('.devicesection').append("<div class='device'>" +
                                         "<div id='headersection'>" + 
-                                            "IoT-device " + id +
+                                            "IoT-device " + device.id +
                                         "</div>" +
                                         "<div class='devicecontent' data-id="+ device.id +">" +
                                             "<span class='devicestatus'>" +
@@ -48,8 +48,11 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
         device.startDevice();
     }    
        
-    var startTransmit = function() {        
-        if (device.state == 'ON') {
+    var startTransmit = function(msg) {        
+        if (device.state == 'ON') {   
+            var msg = '{"d": {"id": "' + deviceIdentifier + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}'; 
+            var message = new Paho.MQTT.Message(msg);
+            client.send(message);      
             console.log('transmitting id = ' + device.id + ' temperature = ' + device.temperature);                
         }
         else {
@@ -69,8 +72,7 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     
     device.startDevice = function() {
         var deviceIdentifier = device.deviceid + device.id;
-        var clientid = 'd:' + organisation + ':' + sensortype + ':' + deviceIdentifier;
-        var msg = '{"d": {"id": "' + deviceIdentifier + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}';        
+        var clientid = 'd:' + organisation + ':' + sensortype + ':' + deviceIdentifier;     
         var brokerurl = organisation + '.' + broker;
         var portNumber = parseInt(port);
         var connected = false;
@@ -87,13 +89,9 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
                 password: device.authmethod,
                 useSSL: false,
                 keepAliveInterval: 120,
-                onSuccess: function () {
+                onSuccess: function () {                    
                     client.subscribe(constants.MQTT.TOPIC);
-                    device.transmitting = setInterval(function() {                          
-                        var message = new Paho.MQTT.Message(msg);
-                        client.send(message);
-                    }, device.interval * 1000)   
-                     
+                    device.transmitting = setInterval(startTransmit(), device.interval * 1000)                       
                     console.log('Subscribed to topic: ' + constants.MQTT.TOPIC);                               
                     console.log('Successfully connected to the IoT broker');
                 },
