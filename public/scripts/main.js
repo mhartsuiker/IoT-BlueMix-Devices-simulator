@@ -48,20 +48,48 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
         device.startDevice();
     }    
        
-    var startTransmit = function(msg) {        
-        if (device.state == 'ON') {   
-            var msg = '{"d": {"id": "' + deviceIdentifier + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}'; 
-            var message = new Paho.MQTT.Message(msg);
-            client.send(message);    
-            console.log('Message = ' + msg);
-            console.log('transmitting id = ' + device.id + ' temperature = ' + device.temperature);                
+    var startTransmit = function() {        
+        if (device.state == 'ON') {             
+            try {             
+                var msg = '{"d": {"id": "' + device.deviceid + device.id + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}'; 
+                console.log('Message = ' + msg);                   
+                var message = new Paho.MQTT.Message(msg);
+                message.destinationName = constants.MQTT.TOPIC;  
+                message.qos = 0;           
+                client.send(message);    
+            }
+            catch (e) {
+                console.log('Exception thrown: ' + e.message);              
+            }
         }
         else {
            console.log('device turned off,  id = ' + device.id);              
         }  
     }
     
+    var onSuccess = function () {              
+        client.subscribe(constants.MQTT.TOPIC);
+        console.log('Subscribed to topic: ' + constants.MQTT.TOPIC);                               
+        console.log('Successfully connected to the IoT broker');                    
+        device.transmitting = setInterval(startTransmit(), device.interval * 1000)                       
+    }
+    
+    var onFailure = function(msg) {
+        console.log('Error connecting to IBM IoT: ' + JSON.stringify(msg));
+    }
+    
+    var onConnectionLost = function(msg) {
+        if (msg.errorCode !== 0) {
+            console.log('Connection lost erorr message: ' + msg.errorMessage);
+        }
+    }
+    
+    var onMessageArrived = function(message) {
+        console.log('Message arrived: ' + message.payloadString);
+    }    
+    
     var cancelTransmit = function() {
+        client.disconnect();
         clearInterval(device.transmitting);
     }
 
@@ -76,33 +104,35 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
         var clientid = 'd:' + organisation + ':' + sensortype + ':' + deviceIdentifier;     
         var brokerurl = organisation + '.' + broker;
         var portNumber = parseInt(port);
-        var connected = false;
-        if (!isNaN(portNumber)) {
-            console.log('SetupMQTTCllient, broker = ' + brokerurl + ' port = ' + port + ' clientid = ' + clientid);      
-            console.log('Clientid = ' + clientid);     
-             
-            client = new Paho.MQTT.Client(brokerurl, portNumber, clientid);     
-            
-            var options = {
-                timeout: 30, // Connection attempt timeout in seconds
-                userName: 'use-token-auth',
-                password: device.authmethod,
-                useSSL: false,
-                keepAliveInterval: 120,
-                onSuccess: function () {                    
-                    client.subscribe(constants.MQTT.TOPIC);
-                    device.transmitting = setInterval(startTransmit(), device.interval * 1000)                       
-                    console.log('Subscribed to topic: ' + constants.MQTT.TOPIC);                               
-                    console.log('Successfully connected to the IoT broker');
-                },
-                 onFailure: function(message) {
-                    console.log('Error connecting to IBM IoT: ' + JSON.stringify(message));
-                }  
-            };
-            client.connect(options);
+        
+        try {
+            if (!isNaN(portNumber)) {
+                console.log('SetupMQTTCllient, broker = ' + brokerurl + ' port = ' + portNumber + ' clientid = ' + clientid);                  
+                
+                var options = {
+                    timeout: 30, // Connection attempt timeout in seconds
+                    userName: device.authmethod,
+                    password: device.authtoken,
+                    keepAliveInterval: 120,
+                    onSuccess: onSuccess,           
+                    onFailure: onFailure
+                };
+                
+                if (portNumber === 8883) {
+                    options.useSSL = true;
+                }
+                
+                client = new Paho.MQTT.Client(brokerurl, portNumber, clientid);  
+                client.onConnectionLost = onConnectionLost;
+                client.OnMessageArrived = onMessageArrived;     
+                client.connect(options);
+            }
+            else {
+                console.log('Error parsing port number');
+            }
         }
-        else {
-            console.log('Error parsing port number');
+        catch (e) {
+            console.log('Exception thrown: ' + e.message);
         }
     }
     
