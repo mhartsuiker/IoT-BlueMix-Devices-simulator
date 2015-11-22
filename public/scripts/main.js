@@ -53,13 +53,13 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
             try {             
                 var msg = '{"d": {"id": "' + device.deviceid + device.id + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}'; 
                 console.log('Message = ' + msg);                   
-                var message = new Paho.MQTT.Message(msg);
+                var message = new Paho.MQTT.Message(JSON.stringify(msg));
                 message.destinationName = constants.MQTT.TOPIC;  
                 message.qos = 0;           
                 client.send(message);    
             }
             catch (e) {
-                console.log('Exception thrown: ' + e.message);              
+                console.log('startTransmit exception thrown: ' + e.message);              
             }
         }
         else {
@@ -113,7 +113,7 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
                     timeout: 30, // Connection attempt timeout in seconds
                     userName: device.authmethod,
                     password: device.authtoken,
-                    keepAliveInterval: 120,
+                    keepAliveInterval: 60,
                     onSuccess: onSuccess,           
                     onFailure: onFailure
                 };
@@ -132,7 +132,7 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
             }
         }
         catch (e) {
-            console.log('Exception thrown: ' + e.message);
+            console.log('startDevice exception thrown: ' + e.message);
         }
     }
     
