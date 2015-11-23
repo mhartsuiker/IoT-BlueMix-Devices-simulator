@@ -1,5 +1,5 @@
 // Represents one individual IoT device
-var Device = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state) {
+var Device = function(id, broker, port, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state) {
     'use strict';
     
     var device = {};
@@ -8,7 +8,6 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     device.id = id,
     device.broker = broker,
     device.port = port,
-    device.protocol = protocol,
     device.organisation = organisation,
     device.sensortype = sensortype,
     device.deviceid = deviceid,
@@ -23,7 +22,6 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     var constants = {
         'MQTT': {
             'AUTHMETHOD': 'use-token-auth',
-            'AUTHTOKEN' : 'ye6QXPs)F)FIIvYcz!',
             'TOPIC': 'iot-2/evt/status/fmt/json'
         }
     }
@@ -54,7 +52,7 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
                 var msg = '{"d": {"id": "' + device.deviceid + device.id + '", "lat": "0" , "lng":"0", "temp": "' + device.temperature + '"}}'; 
                 console.log('Message = ' + msg);                   
                 var message = new Paho.MQTT.Message(JSON.stringify(msg));
-                message.destinationName = constants.MQTT.TOPIC;  
+                message.destinationName = 'iot-2/evt/status/fmt/json';  
                 message.qos = 0;           
                 client.send(message);    
             }
@@ -68,10 +66,10 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     }
     
     var onSuccess = function () {              
-        client.subscribe(constants.MQTT.TOPIC);
-        console.log('Subscribed to topic: ' + constants.MQTT.TOPIC);                               
+        // client.subscribe('iot-2/evt/status/fmt/json');
+        console.log('Subscribed to topic: ' + 'iot-2/evt/status/fmt/json');                               
         console.log('Successfully connected to the IoT broker');                    
-        device.transmitting = setInterval(startTransmit(), device.interval * 1000)                       
+        device.transmitting = setInterval(startTransmit, device.interval * 1000)                       
     }
     
     var onFailure = function(msg) {
@@ -89,13 +87,12 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
     }    
     
     var cancelTransmit = function() {
-        client.disconnect();
         clearInterval(device.transmitting);
     }
 
     device.updateDevice = function(id, temperature) {
+        cancelTransmit();    	
         device.temperature = temperature;
-        cancelTransmit();
         device.transmitting = setInterval(startTransmit, device.interval * 1000)        
     }
     
@@ -135,6 +132,12 @@ var Device = function(id, broker, port, protocol, organisation, sensortype, devi
             console.log('startDevice exception thrown: ' + e.message);
         }
     }
+
+    device.stopDevice = function() {
+    	cancelTransmit();
+    	client.disconnect();
+    	console.log('Çlient disconnected with id: ' + device.id);
+    }
     
     device.changeDeviceState = function(state) {
         if (state == 'OFF') {
@@ -166,13 +169,17 @@ var deviceModule = (function() {
     };
      
     // Each device has it's own service that controls everything the device can do
-    var deviceService = function(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state) {
-        var device = Device(id, broker, port, protocol, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state);
+    var deviceService = function(id, broker, port, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state) {
+        var device = Device(id, broker, port, organisation, sensortype, deviceid, authmethod, authtoken, transmitInterval, temperature, state);
         return device;
     };
     
     deviceService.prototype.startDevice = function(id) {
         services[id].startDevice();
+    }
+ 
+    deviceService.prototype.stopDevice = function(id) {
+    	services[id].stopDevice();
     }
     
     deviceService.prototype.updateDevice = function(id, state) {
@@ -193,7 +200,6 @@ var deviceModule = (function() {
                
         var broker = null,
             port = null,
-            protocol = null,
             organisation = null,
             sensortype = null,
             deviceid = null,
@@ -211,9 +217,6 @@ var deviceModule = (function() {
             }
             if (this.settings[i].name == 'port') {
                 this.port = this.settings[i].value;          
-            }
-            if (this.settings[i].name == 'protocol') {
-                this.protocol = this.settings[i].value;
             }
             if (this.settings[i].name == 'organisation') {
                 this.organisation = this.settings[i].value;
@@ -247,7 +250,7 @@ var deviceModule = (function() {
         // Create a new service for the requested number of devices. 'i' will serve as the service id. 
         // Push the new servivce into the services array
         for(var i = 1; i <= this.numberOfDevices; i++) {
-          services.push(new deviceService(i, this.broker, this.port, this.protocol, this.organisation, this.sensortype, this.deviceid,
+          services.push(new deviceService(i, this.broker, this.port, this.organisation, this.sensortype, this.deviceid,
             this.authmethod, this.authtoken, this.transmitInterval, this.temperature, 'ON'));          
         }
         
@@ -258,8 +261,15 @@ var deviceModule = (function() {
             }         
         }
         
+		deviceController.prototype.stopDevices = function() {
+            for(var i = 0; i < services.length; i++) {
+                services[i].stopDevice(i);
+            } 			
+		}
+
         deviceController.prototype.updateDevice = function(id, temperature) {
-            services[id].updateDevice(id, temperature);  
+        	var s = services;
+            services[id - 1].updateDevice(id - 1, temperature);  
         }     
         
         deviceController.prototype.changeDeviceState = function(id, state) {           
@@ -313,6 +323,12 @@ $(function() {
         deviceController.start();
         
     });
+
+	$('#stopdevicesbutton').on('click', function() {
+		if (deviceController !== null && deviceController !== 'undefined') {
+			deviceController.stopDevices();
+		}
+	})
     
     $('.devicesection').on('click', '.settemperature', function(e) {
         var that = this;
@@ -349,9 +365,6 @@ $(function() {
                 }
                 if (data[i].name == 'port') {
                     $('#portnumber').val(data[i].value);          
-                }
-                if (data[i].name == 'protocol') {
-                    $('#protocol').val(data[i].value);
                 }
                 if (data[i].name == 'organisation') {
                     $('#organisation').val(data[i].value);
