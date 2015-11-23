@@ -153,6 +153,12 @@ textarea {
     float: right;
 }
 
+#showlog {
+    font-weight: normal;
+    float: right;
+    margin-left: 50px;
+}
+
 #headersection {
     height: 30px;
     background-color: #e6e6e6;

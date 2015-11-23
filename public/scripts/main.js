@@ -304,7 +304,8 @@ $(function() {
         if (typeof(Storage) !== 'undefined') {
             if ($('#settingscheckbox').prop('checked') == true) {
                     var data = JSON.stringify($('#settingsform').serializeArray());
-                    localStorage.setItem('iotdevicesimulation', data);       
+                    localStorage.setItem('iotdevicesimulation', data);   
+                    $('#log').append('<p>Settings stored</p>'); 
             }
             else {
                 if (localStorage['iotdevicesimulation']) {
@@ -327,7 +328,12 @@ $(function() {
 	$('#stopdevicesbutton').on('click', function() {
 		if (deviceController !== null && deviceController !== 'undefined') {
 			deviceController.stopDevices();
+        	$('.devicesection').empty();			
 		}
+	})
+
+	$('#showlog').on('click', function() {
+		$('#log').toggle();
 	})
     
     $('.devicesection').on('click', '.settemperature', function(e) {
